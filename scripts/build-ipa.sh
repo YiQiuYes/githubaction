@@ -10,4 +10,4 @@ mkdir -p Payload
 mv ios/iphoneos/Runner.app Payload
 
 sh ../scripts/thin-payload.sh
-zip -9 nosign.ipa -r Payload
+zip -9 release-ios.ipa -r Payload
