@@ -83,6 +83,7 @@ jobs:
       - name: 安装go依赖
         run: |
           go install golang.org/x/mobile/cmd/gomobile@latest
+          ls
       - name: Build (ios)
         run: |
           sh scripts/build-ipa.sh
