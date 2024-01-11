@@ -5,10 +5,9 @@ cd "$( cd "$( dirname "$0"  )" && pwd  )/.."
 flutter pub get
 flutter build ios --release --no-codesign
 
-cd build
+cd build/ios/iphoneos
 mkdir -p Payload
-mv ios/iphoneos/Runner.app Payload
+mv Runner.app Payload
 
-sh ../scripts/thin-payload.sh
+sh ../../../scripts/thin-payload.sh
 zip -9 release-ios.ipa -r Payload
-ls
