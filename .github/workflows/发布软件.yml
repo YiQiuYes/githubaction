@@ -114,13 +114,13 @@ jobs:
       - name: 压缩文件
         # 删除android,ios,windows,linux,build,test文件夹
         run: |
-          del build/windows/runner/Release/data/flutter_assets/android 
-          del build/windows/runner/Release/data/flutter_assets/ios 
-          del build/windows/runner/Release/data/flutter_assets/windows 
-          del build/windows/runner/Release/data/flutter_assets/linux 
-          del build/windows/runner/Release/data/flutter_assets/build 
-          del build/windows/runner/Release/data/flutter_assets/test
-          del build/windows/runner/Release/data/flutter_assets/assets
+          del build/windows/runner/Release/data/flutter_assets/android*
+          del build/windows/runner/Release/data/flutter_assets/ios*
+          del build/windows/runner/Release/data/flutter_assets/windows*
+          del build/windows/runner/Release/data/flutter_assets/linux*
+          del build/windows/runner/Release/data/flutter_assets/build*
+          del build/windows/runner/Release/data/flutter_assets/test*
+          del build/windows/runner/Release/data/flutter_assets/assets*
           del build/windows/runner/Release/data/flutter_assets/.*
           curl -o zip.exe http://stahlworks.com/dev/zip.exe
           .\zip -9 -r build/windows/runner/Release/windows-${{ env.version }}.zip build/windows/runner/Release
