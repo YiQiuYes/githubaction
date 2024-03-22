@@ -122,13 +122,15 @@ jobs:
           del build/windows/runner/Release/data/flutter_assets/test*
           del build/windows/runner/Release/data/flutter_assets/assets*
           del build/windows/runner/Release/data/flutter_assets/.*
+          cd build/windows/runner
+          ren Release windows
           curl -o zip.exe http://stahlworks.com/dev/zip.exe
-          .\zip -9 -r build/windows/runner/Release/windows-${{ env.version }}.zip build/windows/runner/Release
+          .\zip -9 -r windows-${{ env.version }}.zip windows
       - name: 上传产物
         uses: actions/upload-artifact@v3
         with:
           name: exe
-          path: build/windows/runner/Release/windows-${{ env.version }}.zip
+          path: build/windows/runner/windows-${{ env.version }}.zip
 
   jobs4:
     # needs: [ jobs_v,jobs_apk,jobs_ipa,jobs_web ]
