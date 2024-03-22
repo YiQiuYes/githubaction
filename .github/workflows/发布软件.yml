@@ -94,7 +94,7 @@ jobs:
   jobs_windows:
     needs: jobs_v # 等待 jobs_v 任务完成才执行
     name: 构建windows软件
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       version: ${{ needs.jobs_v.outputs.version }}
       body: ${{ needs.jobs_v.outputs.body }}
