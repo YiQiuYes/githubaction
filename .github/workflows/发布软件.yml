@@ -93,7 +93,7 @@ jobs:
 
   jobs_web:
     needs: jobs_v # 等待 jobs_v 任务完成才执行
-    name: 构建android软件
+    name: 构建web应用
     runs-on: ubuntu-latest
     env:
       version: ${{ needs.jobs_v.outputs.version }}
@@ -110,7 +110,7 @@ jobs:
         with:
           flutter-version: '3.13.9'
       - run: flutter pub get
-      - run: flutter build web --release --web-renderer html
+      - run: flutter build web --web-renderer html
       - name: 重命名文件夹并压缩
         run: |
           mv build/web build/web-${{ env.version }}
