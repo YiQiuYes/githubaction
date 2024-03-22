@@ -111,7 +111,7 @@ jobs:
           flutter-version: '3.13.9'
       - run: flutter config --enable-web
       - run: flutter pub get
-      - run: flutter build web --web-renderer html
+      - run: flutter build web --release
       - name: 重命名文件夹并压缩
         run: |
           mv build/web build/web-${{ env.version }}
