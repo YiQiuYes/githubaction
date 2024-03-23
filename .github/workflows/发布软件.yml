@@ -31,6 +31,9 @@ jobs:
     needs: jobs_v
     name: 构建macos
     runs-on: macos-latest
+    env:
+      version: ${{ needs.jobs_v.outputs.version }}
+      body: ${{ needs.jobs_v.outputs.body }}
     steps:
       - uses: actions/checkout@v3
         with:
