@@ -35,31 +35,69 @@ jobs:
       version: ${{ needs.jobs_v.outputs.version }}
       body: ${{ needs.jobs_v.outputs.body }}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: 读入环境信息
-        run: |
-          echo ${{ format('version {0}', env.version ) }} # 版本号
-      - name: 构建Flutter环境
+      - uses: actions/checkout@v4
+      - name: Flutter 环境
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.9'
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-      - name: 编译deb
-        run: | 
-          flutter pub get
-          flutter build macos --release
-          sh scripts/build-linux.sh
-      - name: 重命名文件
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Install Dependencies
         run: |
-          mv build/macos/Build/Products/Release/*.dmg build/macos/Build/Products/Release/macos-${{env.version}}.dmg
-      - name: 上传产物
-        uses: actions/upload-artifact@v3
+          sudo apt-get update -y
+          sudo apt-get install -y tar clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse libunwind-dev locate patchelf gir1.2-appindicator3-0.1 libappindicator3-1 libappindicator3-dev libsecret-1-0 libjsoncpp25 libsecret-1-dev libjsoncpp-dev libnotify-bin libnotify-dev mpv libmpv-dev
+
+      - name: Install AppImage Tool
+        run: |
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          mv appimagetool /usr/local/bin/
+
+      - name: BUILD_VERSION Env (stable)
+        run: |
+          echo "BUILD_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+
+      - name: Create Stable .env
+        run: echo '${{ secrets.DOTENV_RELEASE }}' > .env
+
+      - name: Replace Version in files
+        run: |
+          sed -i 's|%{{APPDATA_RELEASE}}%|<release version="${{ env.BUILD_VERSION }}" date="${{ steps.date.outputs.date }}" />|' linux/com.github.KRTirtho.Spotube.appdata.xml
+
+      - name: Generate Secrets
+        run: |
+          flutter config --enable-linux-desktop
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
+
+      - name: Build Linux Packages
+        run: |
+          dart pub global activate flutter_distributor
+          alias dpkg-deb="dpkg-deb --Zxz"
+          flutter_distributor package --platform=linux --targets=deb
+          flutter_distributor package --platform=linux --targets=rpm
+
+      - name: Create tar.xz (stable)
+        run: make tar VERSION=${{ env.BUILD_VERSION }} ARCH=x64 PKG_ARCH=x86_64
+
+      - name: Move Files to dist
+        run: |
+          mv build/spotube-linux-*-x86_64.tar.xz dist/
+          mv dist/**/spotube-*-linux.deb dist/Spotube-linux-x86_64.deb
+          mv dist/**/spotube-*-linux.rpm dist/Spotube-linux-x86_64.rpm
+
+
+      - uses: actions/upload-artifact@v3
         with:
+          if-no-files-found: error
           name: linux
-          path: build/macos/Build/Products/Release/*.dmg
+          path: |
+            dist/Spotube-linux-${{ env.version }}-x86_64.deb
+            dist/Spotube-linux-${{ env.version }}-x86_64.rpm
+            dist/spotube-linux-${{ env.version }}-x86_64.tar.xz
 
   #  jobs_apk:
   #    needs: jobs_v # 等待 jobs_v 任务完成才执行
@@ -195,4 +233,4 @@ jobs:
           #prerelease: true # 预发布 别人可以看到 版本号会继续加
           tag: ${{ env.version }} # 版本号 v0.1.0
           body: ${{ env.body }} # 输出的内容
-          artifacts: "apk/*.apk,ipa/*.ipa,exe/*.zip,macos/*.dmg,linux/*.deb"
+          artifacts: "apk/*.apk,ipa/*.ipa,exe/*.zip,macos/*.dmg,linux/*.deb,linux/*.rpm,linux/*.tar.xz"
