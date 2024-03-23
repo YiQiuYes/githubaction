@@ -42,50 +42,38 @@ jobs:
           cache: true
           flutter-version: '3.13.9'
 
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
-      - name: Install Dependencies
+      - name: 安装依赖
         run: |
           sudo apt-get update -y
           sudo apt-get install -y tar clang cmake ninja-build pkg-config libgtk-3-dev make python3-pip python3-setuptools desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse libunwind-dev locate patchelf gir1.2-appindicator3-0.1 libappindicator3-1 libappindicator3-dev libsecret-1-0 libjsoncpp25 libsecret-1-dev libjsoncpp-dev libnotify-bin libnotify-dev mpv libmpv-dev
 
-      - name: Install AppImage Tool
+      - name: 安装 AppImage Tool工具
         run: |
           wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x appimagetool
           mv appimagetool /usr/local/bin/
 
-      - name: BUILD_VERSION Env (stable)
-        run: |
-          echo "BUILD_VERSION=${{ env.version }}" >> $GITHUB_ENV
-
-      - name: Create Stable .env
-        run: echo '${{ secrets.TOKEN_GITHUB }}' > .env
-
-      - name: Generate Secrets
+      - name: 开始构建
         run: |
           flutter config --enable-linux-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
 
-      - name: Build Linux Packages
+      - name: 打包
         run: |
           dart pub global activate flutter_distributor
           alias dpkg-deb="dpkg-deb --Zxz"
           flutter_distributor package --platform=linux --targets=deb
           flutter_distributor package --platform=linux --targets=rpm
 
-      - name: Create tar.xz (stable)
+      - name: 创建 tar.xz
         run: make tar VERSION=${{ env.version }} ARCH=x64 PKG_ARCH=x86_64
 
       - name: Move Files to dist
         run: |
-          mv build/schedule-linux-*-x86_64.tar.xz dist/
-          mv dist/**/schedule-*-linux.deb dist/schedule-linux-x86_64.deb
-          mv dist/**/schedule-*-linux.rpm dist/schedule-linux-x86_64.rpm
-
+          mv build/schedule-linux-${{ env.version }}-x86_64.tar.xz dist/
+          mv dist/**/schedule-*-linux.deb dist/schedule-linux-${{ env.version }}-x86_64.deb
+          mv dist/**/schedule-*-linux.rpm dist/schedule-linux-${{ env.version }}-x86_64.rpm
 
       - uses: actions/upload-artifact@v3
         with:
