@@ -29,8 +29,8 @@ jobs:
 
   job_test:
     needs: jobs_v
-    name: 构建macos
-    runs-on: macos-latest
+    name: 构建ubuntu
+    runs-on: ubuntu-latest
     env:
       version: ${{ needs.jobs_v.outputs.version }}
       body: ${{ needs.jobs_v.outputs.body }}
@@ -41,23 +41,24 @@ jobs:
       - name: 读入环境信息
         run: |
           echo ${{ format('version {0}', env.version ) }} # 版本号
-      - name: 编译
+      - name: 构建Flutter环境
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.9'
-#      - name: Setup tmate session
-#        uses: mxschmitt/action-tmate@v3
-      - run: flutter pub get
-      - run: flutter build macos --release
-      - run: |
-          sh scripts/build-macos.sh
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+      - name: 编译deb
+        run: | 
+          flutter pub get
+          flutter build macos --release
+          sh scripts/build-linux.sh
       - name: 重命名文件
         run: |
           mv build/macos/Build/Products/Release/*.dmg build/macos/Build/Products/Release/macos-${{env.version}}.dmg
       - name: 上传产物
         uses: actions/upload-artifact@v3
         with:
-          name: macos
+          name: linux
           path: build/macos/Build/Products/Release/*.dmg
 
   #  jobs_apk:
@@ -194,4 +195,4 @@ jobs:
           #prerelease: true # 预发布 别人可以看到 版本号会继续加
           tag: ${{ env.version }} # 版本号 v0.1.0
           body: ${{ env.body }} # 输出的内容
-          artifacts: "apk/*.apk,ipa/*.ipa,exe/*.zip,macos/*.dmg"
+          artifacts: "apk/*.apk,ipa/*.ipa,exe/*.zip,macos/*.dmg,linux/*.deb"
