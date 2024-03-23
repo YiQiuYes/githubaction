@@ -61,11 +61,7 @@ jobs:
           echo "BUILD_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
 
       - name: Create Stable .env
-        run: echo '${{ secrets.DOTENV_RELEASE }}' > .env
-
-      - name: Replace Version in files
-        run: |
-          sed -i 's|%{{APPDATA_RELEASE}}%|<release version="${{ env.BUILD_VERSION }}" date="${{ steps.date.outputs.date }}" />|' linux/com.github.KRTirtho.Spotube.appdata.xml
+        run: echo '${{ secrets.TOKEN_GITHUB }}' > .env
 
       - name: Generate Secrets
         run: |
