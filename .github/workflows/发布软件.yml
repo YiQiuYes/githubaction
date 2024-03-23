@@ -56,13 +56,18 @@ jobs:
           dart pub global activate flutter_distributor
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
-          mv dist/**/schedule-*-windows-setup.exe dist/schedule-windows-${{env.version}}-x86_64-setup.exe
+          mv dist/**/schedule-*-windows-setup.exe dist/schedule-windows-x86_64-setup.exe
 
       - name: 打包nupkg
         run: |
-          Set-Variable -Name HASH -Value (Get-FileHash dist\schedule-windows-${{env.version}}-x86_64-setup.exe).Hash
+          Set-Variable -Name HASH -Value (Get-FileHash dist\schedule-windows-x86_64-setup.exe).Hash
           make choco
-          mv dist/schedule.*.nupkg dist/schedule-windows-${{env.version}}-x86_64.nupkg
+          mv dist/schedule.*.nupkg dist/schedule-windows-x86_64.nupkg
+
+      - name: 重命名
+        run: |
+          mv dist/schedule-windows-x86_64.nupkg dist/schedule-windows-${{env.version}}-x86_64.nupkg
+          mv dist/schedule-windows-x86_64-setup.exe dist/schedule-windows-${{env.version}}-x86_64-setup.exe
 
       - name: 上传产物
         uses: actions/upload-artifact@v3
