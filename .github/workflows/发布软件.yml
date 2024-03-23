@@ -9,36 +9,53 @@ on:
 permissions: write-all # 给所有工作写权限
 
 jobs:
+  jobs_v:
+    name: 构建版本号和变更信息
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.create_version.outputs.tag_name }} # 版本号
+      body: ${{ steps.create_version.outputs.body }} # 版本变更内容
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        id: create_version
+        with:
+          config-name: release-drafter.yml # 配置文件在 .github/release-drafter.yml
+          disable-autolabeler: true # 禁止自动标签
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+      - name: 查看变量
+        run: |
+          echo ${{ format('version={0}', steps.create_version.outputs.tag_name ) }}
+
   job_test:
+    needs: jobs_v
+    name: 构建macos
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: 读入环境信息
+        run: |
+          echo ${{ format('version {0}', env.version ) }} # 版本号
       - name: 编译
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.9'
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-
-#  jobs_v:
-#    name: 构建版本号和变更信息
-#    runs-on: ubuntu-latest
-#    outputs:
-#      version: ${{ steps.create_version.outputs.tag_name }} # 版本号
-#      body: ${{ steps.create_version.outputs.body }} # 版本变更内容
-#    steps:
-#      - uses: release-drafter/release-drafter@v5
-#        id: create_version
-#        with:
-#          config-name: release-drafter.yml # 配置文件在 .github/release-drafter.yml
-#          disable-autolabeler: true # 禁止自动标签
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-#      - name: 查看变量
-#        run: |
-#          echo ${{ format('version={0}', steps.create_version.outputs.tag_name ) }}
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - run: |
+          sh scripts/build-macos.sh
+      - name: 重命名文件
+        run: |
+          mv build/macos/Build/Products/Release/*.dmg build/macos/Build/Products/Release/macos-${{env.version}}.dmg
+      - name: 上传产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos
+          path: build/macos/Build/Products/Release/*.dmg
 
   #  jobs_apk:
   #    needs: jobs_v # 等待 jobs_v 任务完成才执行
@@ -145,33 +162,33 @@ jobs:
 #          name: exe
 #          path: build/windows/runner/windows-${{ env.version }}.zip
 #
-#  jobs4:
-#    # needs: [ jobs_v,jobs_apk,jobs_ipa,jobs_web ]
-#    needs: [ jobs_v, jobs_windows ]
-#    name: 发布版本
-#    runs-on: ubuntu-latest
-#    env:
-#      version: ${{ needs.jobs_v.outputs.version }}
-#      body: ${{ needs.jobs_v.outputs.body }}
-#    steps:
-#      - name: 下载产物
-#        id: download
-#        uses: actions/download-artifact@v3
-#        with:
-#          path: ./
-#      - name: 读入环境信息
-#        run: |
-#          echo ${{ format('version {0}', env.version ) }}
-#          echo ${{steps.download.outputs.download-path}}
-#          ls -R
-#
-#      - name: 发布文件
-#        uses: ncipollo/release-action@v1
-#        with:
-#          token: ${{ secrets.TOKEN_GITHUB }}
-#          allowUpdates: true # 覆盖文件
-#          #draft: true # 草稿 自己可见 版本号会保持一样 默认是自动发布 latest
-#          #prerelease: true # 预发布 别人可以看到 版本号会继续加
-#          tag: ${{ env.version }} # 版本号 v0.1.0
-#          body: ${{ env.body }} # 输出的内容
-#          artifacts: "apk/*.apk,ipa/*.ipa,exe/*.zip"
+  jobs4:
+    # needs: [ jobs_v,jobs_apk,jobs_ipa,jobs_web ]
+    needs: [ jobs_v, job_test ]
+    name: 发布版本
+    runs-on: ubuntu-latest
+    env:
+      version: ${{ needs.jobs_v.outputs.version }}
+      body: ${{ needs.jobs_v.outputs.body }}
+    steps:
+      - name: 下载产物
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          path: ./
+      - name: 读入环境信息
+        run: |
+          echo ${{ format('version {0}', env.version ) }}
+          echo ${{steps.download.outputs.download-path}}
+          ls -R
+
+      - name: 发布文件
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.TOKEN_GITHUB }}
+          allowUpdates: true # 覆盖文件
+          #draft: true # 草稿 自己可见 版本号会保持一样 默认是自动发布 latest
+          #prerelease: true # 预发布 别人可以看到 版本号会继续加
+          tag: ${{ env.version }} # 版本号 v0.1.0
+          body: ${{ env.body }} # 输出的内容
+          artifacts: "apk/*.apk,ipa/*.ipa,exe/*.zip,macos/*.dmg"
