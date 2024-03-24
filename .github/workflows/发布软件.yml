@@ -68,9 +68,9 @@ jobs:
           flutter_distributor package --platform=windows --targets=exe --skip-clean
           mv dist/**/schedule-*-windows-setup.exe dist/schedule-windows-x86_64-setup.exe
 
-      - uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
+#      - uses: mxschmitt/action-tmate@v3
+#        with:
+#          limit-access-to-actor: true
 
       - name: 打包nupkg
         run: |
