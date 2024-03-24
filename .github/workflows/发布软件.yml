@@ -36,6 +36,7 @@ jobs:
     runs-on: windows-latest
     env:
       version: ${{ needs.job_v.outputs.version }}
+      body: ${{ steps.create_version.outputs.body }} # 版本变更内容
       versionNoV: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v3
@@ -67,10 +68,6 @@ jobs:
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
           mv dist/**/schedule-*-windows-setup.exe dist/schedule-windows-x86_64-setup.exe
-
-#      - uses: mxschmitt/action-tmate@v3
-#        with:
-#          limit-access-to-actor: true
 
       - name: 打包nupkg
         run: |
