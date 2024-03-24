@@ -61,6 +61,10 @@ jobs:
           choco install sed make -y
           sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/runner/Runner.rc
           sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/choco-struct/schedule.nuspec
+          
+      - uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
       - name: 打包exe
         run: |
