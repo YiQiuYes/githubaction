@@ -39,20 +39,20 @@ jobs:
       - name: 读入环境信息
         run: |
           echo ${{ format('version {0}', env.version ) }} # 版本号
-      - name: Flutter 环境
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.13.9'
-
-      - name: 构建
-        run: |
-          flutter config --enable-windows-desktop
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
+#      - name: Flutter 环境
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.13.9'
+#
+#      - name: 构建
+#        run: |
+#          flutter config --enable-windows-desktop
+#          flutter pub get
+#          dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
 
       - name: 替换文本
         run: |
-          "BUILD_VERSION=${{ inputs.version }}+${{ inputs.channel }}.${{ github.run_number }}" >> $env:GITHUB_ENV
+          "BUILD_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
           choco install sed make -y
           sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/choco-struct/schedule.nuspec
 
