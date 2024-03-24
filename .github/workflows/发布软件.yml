@@ -52,6 +52,11 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
 
+      - name: 替换文本
+        run: |
+          choco install sed make -y
+          sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.version }}/" windows/choco-struct/schedule.nuspec
+
 #      - uses: mxschmitt/action-tmate@v3
 #        with:
 #          limit-access-to-actor: true
