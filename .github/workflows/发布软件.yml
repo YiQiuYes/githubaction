@@ -36,7 +36,7 @@ jobs:
     runs-on: windows-latest
     env:
       version: ${{ needs.job_v.outputs.version }}
-      body: ${{ steps.create_version.outputs.body }} # 版本变更内容
+      body: ${{ needs.job_v.outputs.body }}
       versionNoV: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v3
