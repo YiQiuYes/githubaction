@@ -6,14 +6,14 @@ MIRRORLIST=${PWD}/build/mirrorlist
 
 tar:
 	mkdir -p $(TEMP_DIR)\
- && cp -r $(BUNDLE_DIR)/* $(TEMP_DIR)\
- && cp linux/schedule.desktop $(TEMP_DIR)\
- && cp assets/images/logo.png $(TEMP_DIR)\
- && tar -cJf build/schedule-linux-${VERSION}-${PKG_ARCH}.tar.xz -C $(TEMP_DIR) .\
- && rm -rf $(TEMP_DIR)
+    && cp -r $(BUNDLE_DIR)/* $(TEMP_DIR)\
+    && cp linux/schedule.desktop $(TEMP_DIR)\
+    && cp assets/images/logo.png $(TEMP_DIR)\
+    && tar -cJf build/schedule-linux-${VERSION}-${PKG_ARCH}.tar.xz -C $(TEMP_DIR) .\
+    && rm -rf $(TEMP_DIR)
 
 inno:
-    powershell .\build\iscc\iscc.exe scripts\windows-setup-creator.iss
+	powershell .\build\iscc\iscc.exe scripts\windows-setup-creator.iss
 
 innoinstall:
 	powershell mkdir build
