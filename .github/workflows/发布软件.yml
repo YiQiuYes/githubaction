@@ -55,6 +55,7 @@ jobs:
       - uses: mxschmitt/action-tmate@v3
         with:
           limit-access-to-actor: true
+
       - name: 打包exe
         run: |
           dart pub global activate flutter_distributor
