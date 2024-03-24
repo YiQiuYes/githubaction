@@ -70,7 +70,6 @@ dependencies:
   # 权限检查
   permission_handler: ^11.0.1
   build_runner: ^2.4.8
-  flutter_distributor: ^0.3.7
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

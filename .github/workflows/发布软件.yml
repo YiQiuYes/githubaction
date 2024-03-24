@@ -1,10 +1,8 @@
 name: 发布软件
 
 on:
-  push: # 代码推送到master分支自动触发工作流
-    branches:
-      - master
   workflow_dispatch: # 手动触发
+
 
 permissions: write-all # 给所有工作写权限
 
@@ -52,14 +50,14 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
 
+      - uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
       - name: 替换文本
         run: |
           choco install sed make -y
           sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.version }}/" windows/choco-struct/schedule.nuspec
-
-#      - uses: mxschmitt/action-tmate@v3
-#        with:
-#          limit-access-to-actor: true
 
       - name: 打包exe
         run: |
