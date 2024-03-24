@@ -61,10 +61,6 @@ jobs:
           choco install sed make -y
           sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/runner/Runner.rc
           sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/choco-struct/schedule.nuspec
-          
-      - uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
 
       - name: 打包exe
         run: |
@@ -72,6 +68,10 @@ jobs:
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
           mv dist/**/schedule-*-windows-setup.exe dist/schedule-windows-x86_64-setup.exe
+
+      - uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
       - name: 打包nupkg
         run: |
