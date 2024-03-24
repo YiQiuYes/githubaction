@@ -52,9 +52,9 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs --enable-experiment=records,patterns
 
-      - uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
+#      - uses: mxschmitt/action-tmate@v3
+#        with:
+#          limit-access-to-actor: true
 
       - name: 打包exe
         run: |
