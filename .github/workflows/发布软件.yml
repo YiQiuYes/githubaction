@@ -36,8 +36,7 @@ jobs:
     runs-on: windows-latest
     env:
       version: ${{ needs.job_v.outputs.version }}
-      body: ${{ inputs.version }}
-      BUILD_VERSION: ${{ needs.job_v.outputs.version }}
+      versionNoV: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -59,8 +58,8 @@ jobs:
       - name: 替换文本
         run: |
           choco install sed make -y
-          sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/runner/Runner.rc
-          sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.BUILD_VERSION }}/" windows/choco-struct/schedule.nuspec
+          sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.versionNoV }}/" windows/runner/Runner.rc
+          sed -i "s/%{{SCHEDULE_VERSION}}%/${{ env.versionNoV }}/" windows/choco-struct/schedule.nuspec
 
       - name: 打包exe
         run: |
